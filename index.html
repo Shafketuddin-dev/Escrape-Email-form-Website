@@ -1,1 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Extraction Tool</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    #progress {
+      display: none;
+    }
+  </style>
+</head>
+
+
+<body class="container mt-5">
+  <h2>Email Extraction Tool</h2>
+
+
+  <!-- Input form to export URLs to Google Sheets -->
+  <form id="urlForm">
+    <div class="form-group">
+      <label for="urlList">URL List (one URL per line):</label>
+      <textarea class="form-control" id="urlList" rows="5" required></textarea>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="exportToGoogleSheet()">Export to Google Sheet</button>
+  </form>
+
+
+  <!-- Button to trigger email extraction from websites -->
+  <button id="extractBtn" class="btn btn-success mt-3" style="display: none;" onclick="extractEmails()">Click to extract emails</button>
+
+
+  <!-- Progress animation -->
+  <div id="progress" class="mt-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <p class="mt-2">Extracting emails. Please wait...</p>
+  </div>
+
+
+  <!-- Display results -->
+  <div id="results" class="mt-3"></div>
+
+
+  <script>
+    function exportToGoogleSheet() {
+      var urlList = document.getElementById("urlList").value;
+      google.script.run.withSuccessHandler(function () {
+        document.getElementById("extractBtn").style.display = "block";
+      }).exportURLList(urlList);
+    }
+
+
+    function extractEmails() {
+      document.getElementById("progress").style.display = "block";
+      document.getElementById("extractBtn").style.display = "none";
+
+
+      google.script.run.withSuccessHandler(function (results) {
+        document.getElementById("progress").style.display = "none";
+        displayResults(results);
+      }).processWebsites();
+    }
+
+
+    function displayResults(results) {
+      var resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<h4>Email Extraction Results:</h4>";
+
+
+      if (results.length > 0) {
+        // Create a table
+        var table = "<table class='table table-bordered'><thead><tr><th>URL</th><th>Extracted Email</th></tr></thead><tbody>";
+
+
+        // Add rows to the table
+        results.forEach(function (result) {
+          table += "<tr><td>" + result.url + "</td><td>" + result.email + "</td></tr>";
+        });
+
+
+        // Close the table
+        table += "</tbody></table>";
+
+
+        resultsDiv.innerHTML += table;
+      } else {
+        resultsDiv.innerHTML += "<p>No results found.</p>";
+      }
+    }
+  </script>
+</body>
+
+
+</html>
 
